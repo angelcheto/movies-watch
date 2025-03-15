@@ -1,0 +1,26 @@
+{
+    "5993d03a-724c-4152-95e3-a0b900103b16": {
+        "title": "Warframe",
+        "category": "Collection Shooter",
+        "maxLevel": "9999",
+        "imageUrl": "https://www-static.warframe.com/images/longlanding/warframe-metacard.png",
+        "summary": "Warframe is a free-to-play action role-playing third-person shooter multiplayer online game developed and published by Digital Extremes. ",
+        "_id": "5993d03a-724c-4152-95e3-a0b900103b16"
+    },
+    "0e6bb009-a3eb-42ae-8c77-aebe07289855": {
+        "title": "League of Legends",
+        "category": "MOBA",
+        "maxLevel": "18",
+        "imageUrl": "https://cdn1.epicgames.com/offer/24b9b5e323bc40eea252a10cdd3b2f10/EGS_LeagueofLegends_RiotGames_S1_2560x1440-80471666c140f790f28dff68d72c384b",
+        "summary": "League of Legends, commonly referred to as League, is a 2009 multiplayer online battle arena video game developed and published by Riot Games. Inspired by Defense of the Ancients, a custom map for Warcraft III, Riot's founders sought to develop a stand-alone game in the same genre.",
+        "_id": "0e6bb009-a3eb-42ae-8c77-aebe07289855"
+    },
+    "8d969a06-29d2-4fe3-b6f4-7f0d9724adfa": {
+        "title": "Counter Strike",
+        "category": "FPS Shooter",
+        "maxLevel": "3",
+        "imageUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/730/capsule_616x353.jpg?t=1719426374",
+        "summary": "Counter-Strike is a series of multiplayer tactical first-person shooter video games in which teams of terrorists battle to perpetrate an act of terror while counter-terrorists try to prevent it. The series began on Windows in 1999 with the release of the first game, Counter-Strike",
+        "_id": "8d969a06-29d2-4fe3-b6f4-7f0d9724adfa"
+    }
+}
