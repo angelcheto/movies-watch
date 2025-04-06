@@ -1,14 +1,15 @@
 import { getAccessToken } from './authUtils';
 
-async function request(method, url, data) {
+async function requester(method, url, data) {
   const options = {
-    method,
+    method: method !== 'GET' ? method : 'GET',
     headers: {}
   };
 
   const token = getAccessToken();
   if (token) {
-    options.headers['Authorization'] = `Bearer ${token}`;
+    options.headers['X-Authorization'] = token;
+
   }
 
   if (data) {
@@ -17,9 +18,9 @@ async function request(method, url, data) {
   }
 
   const response = await fetch(url, options);
-
+  
   if (response.status === 204) {
-    return null;
+    return;
   }
 
   const result = await response.json();
@@ -31,9 +32,14 @@ async function request(method, url, data) {
   return result;
 }
 
-export const get = (url) => request('GET', url);
-export const post = (url, data) => request('POST', url, data);
-export const put = (url, data) => request('PUT', url, data);
-export const del = (url) => request('DELETE', url);
+export const get = requester.bind(null, 'GET');
+export const post = requester.bind(null, 'POST');
+export const put = requester.bind(null, 'PUT');
+export const del = requester.bind(null, 'DELETE');
 
-export default { get, post, put, del };
+export default {
+  get, 
+  post, 
+  put, 
+  del,
+};

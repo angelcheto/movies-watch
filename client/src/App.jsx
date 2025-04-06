@@ -8,6 +8,7 @@ import Register from './components/auth/Register';
 import MovieDetails from './components/movies/MovieDetails';
 import CreateMovie from './components/movies/CreateMovie';
 import EditMovie from './components/movies/EditMovie';
+import MovieCatalog from './components/movies/MovieCatalog';
 
 function App() {
   const { user } = useContext(AuthContext);
@@ -19,6 +20,7 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Home />} />
+          <Route path="/catalog" element={<MovieCatalog />} />
           <Route path="/movies/:movieId" element={<MovieDetails />} />
           
           {/* Auth routes */}

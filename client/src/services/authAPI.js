@@ -1,6 +1,6 @@
-import { get, post } from './requester';
+import { post, get } from './requester';
 
-const BASE_URL = 'http://localhost:3001/api/auth';
+const BASE_URL = 'http://localhost:3030/users';
 
 export const login = (email, password) => post(`${BASE_URL}/login`, { email, password });
 export const register = (email, password) => post(`${BASE_URL}/register`, { email, password });
