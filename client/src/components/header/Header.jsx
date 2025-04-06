@@ -1,18 +1,32 @@
-<header>
-    <h1><a className="home" href="#">GamesPlay</a></h1>
-    <nav>
-        <a href="#">All games</a>
+import { Link } from 'react-router-dom';
+import { useContext } from 'react';
+import { AuthContext } from '../../services/AuthContext';
+import '@styles/navigation.css';
+
+const Header = () => {
+  const { user, logout } = useContext(AuthContext);
+
+  return (
+    <header>
+      <h1><Link className="home" to="/">MovieHub</Link></h1>
+      <nav>
+        <Link to="/">All movies</Link>
         
-        {/* Logged-in users */}
-        <div id="user">
-            <a href="#">Create Game</a>
-            <a href="#">Logout</a>
-        </div>
-        
-        {/* Guest users */}
-        <div id="guest">
-            <a href="#">Login</a>
-            <a href="#">Register</a>
-        </div>
-    </nav>
-</header>
+        {user ? (
+          <div id="user">
+            <Link to="/movies/create">Add Movie</Link>
+            <button onClick={logout}>Logout</button>
+            <span>Welcome, {user.email}</span>
+          </div>
+        ) : (
+          <div id="guest">
+            <Link to="/login">Login</Link>
+            <Link to="/register">Register</Link>
+          </div>
+        )}
+      </nav>
+    </header>
+  );
+};
+
+export default Header;

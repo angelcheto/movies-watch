@@ -1,54 +1,114 @@
-<section id="welcome-world">
-    <div className="welcome-message">
-        <h2>ALL new games are</h2>
-        <h3>Only in GamesPlay</h3>
+import "@styles/typography.css";
+import "@styles/welcome.css";
+import "@styles/all-games.css";
+
+import React, { useState, useEffect } from 'react';
+import { fetchFeaturedMovies } from '../../services/movieService'; 
+
+const Home = () => {
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const getMovies = async () => {
+      try {
+        const data = await fetchFeaturedMovies();
+        setMovies(data);
+      } catch (err) {
+        setError('Failed to load movies. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    getMovies();
+  }, []);
+
+  if (loading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage message={error} />;
+  if (movies.length === 0) return <NoMoviesAvailable />;
+
+  return (
+    <div className="home-container">
+      <HeroBanner />
+      <MovieGrid movies={movies} />
     </div>
-    <img src="./images/four_slider_img01.png" alt="hero" />
+  );
+};
 
-    <div id="home-page">
-        <h1>Latest Games</h1>
+const LoadingSpinner = () => (
+  <div className="loading">
+    <div className="spinner"></div>
+    <p>Loading movies...</p>
+  </div>
+);
 
-        {/* Display games if available */}
-        <div className="game">
-            <div className="image-wrap">
-                <img src="./images/CoverFire.png" alt="Cover Fire" />
-            </div>
-            <h3>Cover Fire</h3>
-            <div className="rating">
-                <span>☆</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span>
-            </div>
-            <div className="data-buttons">
-                <a href="#" className="btn details-btn">Details</a>
-            </div>
-        </div>
+const ErrorMessage = ({ message }) => (
+  <div className="error">
+    <p>{message}</p>
+    <button onClick={() => window.location.reload()}>Retry</button>
+  </div>
+);
 
-        <div className="game">
-            <div className="image-wrap">
-                <img src="./images/ZombieLang.png" alt="Zombie Lang" />
-            </div>
-            <h3>Zombie Lang</h3>
-            <div className="rating">
-                <span>☆</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span>
-            </div>
-            <div className="data-buttons">
-                <a href="#" className="btn details-btn">Details</a>
-            </div>
-        </div>
+const NoMoviesAvailable = () => (
+  <div className="empty-state">
+    <img src="/images/popcorn.png" alt="No movies" />
+    <p>Coming soon! Check back for new releases.</p>
+  </div>
+);
 
-        <div className="game">
-            <div className="image-wrap">
-                <img src="./images/MineCraft.png" alt="Minecraft" />
-            </div>
-            <h3>MineCraft</h3>
-            <div className="rating">
-                <span>☆</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span>
-            </div>
-            <div className="data-buttons">
-                <a href="#" className="btn details-btn">Details</a>
-            </div>
-        </div>
-
-        {/* Display message if no games */}
-        <p className="no-articles">No games yet</p>
+const HeroBanner = () => (
+  <div className="hero">
+    <div className="hero-text">
+      <h2>DISCOVER THE LATEST CINEMATIC MASTERPIECES</h2>
+      <h3>Exclusively on MovieHub</h3>
     </div>
-</section>
+    <img 
+      src="/images/cinema_banner.jpg" 
+      alt="Cinema banner" 
+      onError={(e) => e.target.src = '/images/default_banner.jpg'}
+    />
+  </div>
+);
+
+const MovieGrid = ({ movies }) => (
+  <div className="movie-section">
+    <h1>Featured Movies</h1>
+    <div className="movies-grid">
+      {movies.map(movie => (
+        <MovieCard key={movie.id} movie={movie} />
+      ))}
+    </div>
+  </div>
+);
+
+const MovieCard = ({ movie }) => (
+  <div className="movie-card">
+    <div className="movie-image">
+      <img
+        src={movie.image}
+        alt={movie.title}
+        onError={(e) => e.target.src = '/images/movie_placeholder.jpg'}
+      />
+      <div className="movie-overlay">
+        <a href={`/movies/${movie.id}`}>View Details</a>
+      </div>
+    </div>
+    <div className="movie-details">
+      <h3>{movie.title}</h3>
+      <StarRating rating={movie.rating} />
+    </div>
+  </div>
+);
+
+const StarRating = ({ rating }) => (
+  <div className="stars">
+    {[...Array(5)].map((_, i) => (
+      <span key={i} className={i < rating ? 'filled' : ''}>
+        {i < rating ? '★' : '☆'}
+      </span>
+    ))}
+  </div>
+);
+
+export default Home;
