@@ -1,7 +1,7 @@
 import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../services/AuthContext';
-import { movieService } from '../../services/movieService';
+import movieService from '../../services/movieService';  
 import '@styles/movie-form.css';
 
 const CreateMovie = () => {

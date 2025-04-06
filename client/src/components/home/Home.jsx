@@ -3,7 +3,7 @@ import "@styles/welcome.css";
 import "@styles/all-games.css";
 
 import React, { useState, useEffect } from 'react';
-import { fetchFeaturedMovies } from '../../services/movieService'; 
+import { getFeatured } from '../../services/movieService'; 
 
 const Home = () => {
   const [movies, setMovies] = useState([]);
@@ -13,7 +13,7 @@ const Home = () => {
   useEffect(() => {
     const getMovies = async () => {
       try {
-        const data = await fetchFeaturedMovies();
+        const data = await getFeatured();
         setMovies(data);
       } catch (err) {
         setError('Failed to load movies. Please try again.');

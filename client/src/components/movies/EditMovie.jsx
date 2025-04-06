@@ -1,114 +1,96 @@
 import "@styles/movie-form.css";
-
 import { useParams, useNavigate } from 'react-router-dom';
 import { useContext, useState, useEffect } from 'react';
-import { AuthContext } from '../../services/AuthContext.jsx';
-import { movieService } from '../../services/movieService';
+import { AuthContext } from '../../services/AuthContext';
+import movieService from '../../services/movieService';
 
 const EditMovie = () => {
   const { movieId } = useParams();
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    title: '',
-    genre: '',
-    year: '',
-    imageUrl: '',
-    description: ''
-  });
+  const [form, setForm] = useState({ title: '', genre: '', year: '', imageUrl: '', description: '' });
   const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchMovie = async () => {
+    const loadMovie = async () => {
       try {
         const movie = await movieService.getById(movieId);
-        if (movie.ownerId !== user._id) {
-          navigate('/');
-          return;
-        }
-        setFormData({
-          title: movie.title,
-          genre: movie.genre,
-          year: movie.year,
-          imageUrl: movie.imageUrl,
-          description: movie.description
-        });
-      } catch (error) {
-        console.error('Error fetching movie:', error);
+        if (movie.ownerId !== user._id) return navigate('/');
+        setForm(movie);
+      } catch {
         navigate('/');
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
-    fetchMovie();
+    loadMovie();
   }, [movieId, user, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setForm(prev => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
-  const validateForm = () => {
+  const validate = () => {
     const newErrors = {};
-    if (!formData.title.trim()) newErrors.title = 'Title is required';
-    if (!formData.genre.trim()) newErrors.genre = 'Genre is required';
-    if (!formData.year) newErrors.year = 'Year is required';
-    if (formData.year < 1900 || formData.year > 2030) newErrors.year = 'Year must be between 1900 and 2030';
-    if (!formData.imageUrl.trim()) newErrors.imageUrl = 'Image URL is required';
-    if (!formData.description.trim()) newErrors.description = 'Description is required';
+    if (!form.title.trim()) newErrors.title = 'Title required';
+    if (!form.genre.trim()) newErrors.genre = 'Genre required';
+    if (!form.year || form.year < 1900 || form.year > 2030) newErrors.year = 'Valid year required';
+    if (!form.imageUrl.trim()) newErrors.imageUrl = 'Image URL required';
+    if (!form.description.trim()) newErrors.description = 'Description required';
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return !Object.keys(newErrors).length;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validate()) return;
 
     try {
-      await movieService.update(movieId, formData, user.accessToken);
+      await movieService.update(movieId, form);
       navigate(`/movies/${movieId}`);
-    } catch (error) {
-      console.error('Error updating movie:', error);
-      setErrors({ submit: 'Failed to update movie. Please try again.' });
+    } catch {
+      setErrors({ submit: 'Update failed. Please try again.' });
     }
   };
 
-  if (isLoading) return <div className="loading-spinner">Loading...</div>;
+  if (loading) return <div className="loading">Loading...</div>;
 
   return (
-    <div className="movie-form-container">
-      <div className="movie-form-header">
-        <h1>Edit Movie</h1>
-      </div>
-      {errors.submit && <div className="error-message">{errors.submit}</div>}
+    <div className="form-container">
+      <h1>Edit Movie</h1>
+      {errors.submit && <div className="error">{errors.submit}</div>}
       
-      <form className="movie-form" onSubmit={handleSubmit}>
-        {/* Form groups remain the same but use new CSS classes */}
-        <div className="form-group">
-          <label htmlFor="title">Title</label>
-          <input
-            type="text"
-            id="title"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            className={errors.title ? 'has-error' : ''}
-          />
-          {errors.title && <span className="form-error">{errors.title}</span>}
+      <form onSubmit={handleSubmit}>
+        {['title', 'genre', 'year', 'imageUrl'].map(field => (
+          <div key={field} className={`form-group ${errors[field] ? 'error' : ''}`}>
+            <label>{field.charAt(0).toUpperCase() + field.slice(1)}</label>
+            <input
+              type={field === 'year' ? 'number' : 'text'}
+              name={field}
+              value={form[field]}
+              onChange={handleChange}
+              min={field === 'year' ? '1900' : undefined}
+              max={field === 'year' ? '2030' : undefined}
+            />
+            {errors[field] && <span>{errors[field]}</span>}
+          </div>
+        ))}
+
+        <div className={`form-group ${errors.description ? 'error' : ''}`}>
+          <label>Description</label>
+          <textarea name="description" value={form.description} onChange={handleChange} />
+          {errors.description && <span>{errors.description}</span>}
         </div>
         
-        {/* Other form groups... */}
-        
-        <button type="submit" className="submit-btn" disabled={isLoading}>
-          {isLoading ? 'Updating...' : 'Update Movie'}
+        <button type="submit" disabled={loading}>
+          {loading ? 'Saving...' : 'Save Changes'}
         </button>
       </form>
     </div>
   );
 };
+
 export default EditMovie;

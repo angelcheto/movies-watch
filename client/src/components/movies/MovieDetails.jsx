@@ -1,9 +1,8 @@
 import "@styles/movie-details.css";
-
 import { useParams, useNavigate } from 'react-router-dom';
 import { useContext, useState, useEffect } from 'react';
-import { AuthContext } from '../../services/AuthContext.jsx';
-import { movieService } from '../../services/movieService';
+import { AuthContext } from '../../services/AuthContext';
+import movieService from '../../services/movieService';
 
 const MovieDetails = () => {
   const { movieId } = useParams();
@@ -48,7 +47,7 @@ const MovieDetails = () => {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this movie?')) {
       try {
-        await movieService.deleteMovie(movieId);
+        await movieService.remove(movieId);
         navigate('/');
       } catch (err) {
         console.error('Error deleting movie:', err);
@@ -67,15 +66,13 @@ const MovieDetails = () => {
           className="movie-poster" 
           src={movie.imageUrl} 
           alt={movie.title}
-          onError={(e) => {
-            e.target.src = '/images/movie_placeholder.jpg';
-          }}
+          onError={(e) => e.target.src = '/images/movie_placeholder.jpg'}
         />
         <div className="movie-info">
-          <h1 className="movie-title">{movie.title}</h1>
+          <h1>{movie.title}</h1>
           <div className="movie-meta">
-            <span className="year">Year: {movie.year}</span>
-            <span className="genre">{movie.genre}</span>
+            <span>Year: {movie.year}</span>
+            <span>{movie.genre}</span>
           </div>
         </div>
       </div>
@@ -85,57 +82,46 @@ const MovieDetails = () => {
       </div>
 
       <div className="reviews-section">
-        <h2 className="reviews-title">Reviews</h2>
+        <h2>Reviews</h2>
         {movie.comments?.length > 0 ? (
           <ul className="reviews-list">
-            {movie.comments.map((comment, index) => (
-              <li key={index} className="review-item">
-                <p className="review-author">{comment.author}</p>
-                <p>{comment.content}</p>
+            {movie.comments.map((c, i) => (
+              <li key={i}>
+                <p className="author">{c.author}</p>
+                <p>{c.content}</p>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="no-reviews">No reviews yet</p>
+          <p>No reviews yet</p>
         )}
       </div>
 
       {user && user._id === movie.ownerId && (
         <div className="action-buttons">
-          <button 
-            className="action-btn edit-btn"
-            onClick={() => navigate(`/movies/${movie._id}/edit`)}
-          >
+          <button onClick={() => navigate(`/movies/${movie._id}/edit`)}>
             Edit
           </button>
-          <button 
-            className="action-btn delete-btn"
-            onClick={handleDelete}
-          >
+          <button onClick={handleDelete}>
             Delete
           </button>
         </div>
       )}
 
       {user && (
-        <div className="add-review">
-          <form className="review-form" onSubmit={handleCommentSubmit}>
-            <label htmlFor="new-comment">Add Review</label>
-            <textarea
-              id="new-comment"
-              className="review-textarea"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Write your review..."
-              required
-            />
-            <button type="submit" className="review-submit">
-              Submit Review
-            </button>
-          </form>
-        </div>
+        <form className="review-form" onSubmit={handleCommentSubmit}>
+          <label>Add Review</label>
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Write your review..."
+            required
+          />
+          <button type="submit">Submit</button>
+        </form>
       )}
     </div>
   );
 };
+
 export default MovieDetails;

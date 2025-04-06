@@ -1,17 +1,17 @@
-import { useState } from 'react';  // Add this import
+import { useState } from 'react';  
 import { useLogin } from '../../services/useAuth';
 import '@styles/auth-forms.css';
 
 const Login = () => {
   const login = useLogin();
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await login(formData.email, formData.password);
-    } catch (error) {
-      console.error('Login failed:', error);
+    const result = await login(formData.email, formData.password);
+    if (!result.success) {
+      setError(result.error);
     }
   };
 
