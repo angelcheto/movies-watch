@@ -2,34 +2,40 @@ import { getAccessToken } from './authUtils';
 
 async function requester(method, url, data) {
   const options = {
-    method: method !== 'GET' ? method : 'GET',
+    method: method.toUpperCase(),
     headers: {}
   };
 
-  const token = getAccessToken();
-  if (token) {
-    options.headers['X-Authorization'] = token;
+  try {
+    const accessToken = getAccessToken();
+    if (accessToken) {
+      options.headers['Authorization'] = `Bearer ${accessToken}`;
+    }
 
+    if (data) {
+      options.headers['Content-Type'] = 'application/json';
+      options.body = JSON.stringify(data);
+    }
+
+    console.log('Making request to:', url, 'with options:', options);
+    
+    const response = await fetch(url, options);
+    console.log('Received response:', response.status, response.statusText);
+
+    if (response.status === 204) return null;
+    
+    const result = await response.json().catch(() => ({}));
+    
+    if (!response.ok) {
+      console.error('API Error:', result);
+      throw new Error(result.message || `Request failed with status ${response.status}`);
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Full error details:', error);
+    throw new Error(error.message || 'Network request failed');
   }
-
-  if (data) {
-    options.headers['Content-Type'] = 'application/json';
-    options.body = JSON.stringify(data);
-  }
-
-  const response = await fetch(url, options);
-  
-  if (response.status === 204) {
-    return;
-  }
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    throw result;
-  }
-
-  return result;
 }
 
 export const get = requester.bind(null, 'GET');
@@ -38,8 +44,8 @@ export const put = requester.bind(null, 'PUT');
 export const del = requester.bind(null, 'DELETE');
 
 export default {
-  get, 
-  post, 
-  put, 
+  get,
+  post,
+  put,
   del,
 };

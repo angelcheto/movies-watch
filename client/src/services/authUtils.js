@@ -1,17 +1,10 @@
 export const getAccessToken = () => {
-  const user = localStorage.getItem('user');
-  return user ? JSON.parse(user).token : '';
-};
+  const authJSON = localStorage.getItem('auth');
 
-export const storeUserData = (userData) => {
-  localStorage.setItem('user', JSON.stringify(userData));
-};
+  if (!authJSON) {
+      return '';
+  }
 
-export const clearUserData = () => {
-  localStorage.removeItem('user');
-};
-
-export const getUserData = () => {
-  const user = localStorage.getItem('user');
-  return user ? JSON.parse(user) : null;
-};
+  const authData = JSON.parse(authJSON);
+  return authData?.accessToken;
+}

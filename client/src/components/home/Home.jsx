@@ -1,9 +1,8 @@
 import "@styles/typography.css";
 import "@styles/welcome.css";
 import "@styles/all-games.css";
-
 import React, { useState, useEffect } from 'react';
-import { getFeatured } from '../../services/movieService'; 
+import { getLatest } from '../../services/movieAPI'; 
 
 const Home = () => {
   const [movies, setMovies] = useState([]);
@@ -13,7 +12,7 @@ const Home = () => {
   useEffect(() => {
     const getMovies = async () => {
       try {
-        const data = await getFeatured();
+        const data = await getLatest(); 
         setMovies(data);
       } catch (err) {
         setError('Failed to load movies. Please try again.');
@@ -76,7 +75,7 @@ const MovieGrid = ({ movies }) => (
     <h1>Featured Movies</h1>
     <div className="movies-grid">
       {movies.map(movie => (
-        <MovieCard key={movie.id} movie={movie} />
+        <MovieCard key={movie._id} movie={movie} /> 
       ))}
     </div>
   </div>
@@ -86,17 +85,17 @@ const MovieCard = ({ movie }) => (
   <div className="movie-card">
     <div className="movie-image">
       <img
-        src={movie.image}
+        src={movie.imageUrl || '/images/movie_placeholder.jpg'} 
         alt={movie.title}
         onError={(e) => e.target.src = '/images/movie_placeholder.jpg'}
       />
       <div className="movie-overlay">
-        <a href={`/movies/${movie.id}`}>View Details</a>
+        <a href={`/movies/${movie._id}`}>View Details</a> 
       </div>
     </div>
     <div className="movie-details">
       <h3>{movie.title}</h3>
-      <StarRating rating={movie.rating} />
+      {movie.rating && <StarRating rating={movie.rating} />} 
     </div>
   </div>
 );

@@ -1,40 +1,41 @@
 import { useNavigate } from "react-router-dom";
-import { login, register, logout } from "@services/authAPI";
-import { useAuthContext } from "@services/AuthContext";
-import { storeUserData, clearUserData } from "@services/authUtils";
+import { login, register, logout } from "./authAPI";
+import { useAuthContext } from "./AuthContext"
 
 export const useLogin = () => {
-  const { setUser } = useAuthContext();
+  const { changeAuthState } = useAuthContext();
   const navigate = useNavigate();
 
   const loginHandler = async (email, password) => {
-    try {
-      const authData = await login(email, password);
-      storeUserData(authData); 
-      setUser(authData);
+      const { password: _, ...authData } = await login(email, password);
+      changeAuthState(authData);
+      localStorage.setItem('auth', JSON.stringify(authData)); 
       navigate('/'); 
-      return { success: true, data: authData };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  };
+      return authData;
+  }
 
   return loginHandler;
 };
 
 export const useRegister = () => {
-  const { setUser } = useAuthContext();
+  const { changeAuthState } = useAuthContext();
   const navigate = useNavigate();
+  const login = useLogin(); 
 
   const registerHandler = async (email, password) => {
     try {
-      const authData = await register(email, password);
-      storeUserData(authData); // Store in localStorage
-      setUser(authData);
-      navigate('/'); // Redirect after registration
-      return { success: true, data: authData };
+      await register(email, password);
+      
+      const { password: _, ...authData } = await login(email, password);
+      
+      changeAuthState(authData);
+      localStorage.setItem('auth', JSON.stringify(authData));
+      navigate('/');
+      return authData;
     } catch (error) {
-      return { success: false, error: error.message };
+      changeAuthState(null);
+      localStorage.removeItem('auth');
+      throw error;
     }
   };
 
@@ -42,20 +43,14 @@ export const useRegister = () => {
 };
 
 export const useLogout = () => {
-  const { setUser } = useAuthContext();
+  const { changeAuthState } = useAuthContext();
   const navigate = useNavigate();
 
-  const logoutHandler = async () => {
-    try {
-      await logout();
-      clearUserData(); 
-      setUser(null);
-      navigate('/login');
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
+  return async () => {
+    localStorage.removeItem('auth');
+    changeAuthState(null);
+    navigate('/login');
+    
+    window.location.reload();
   };
-
-  return logoutHandler;
 };

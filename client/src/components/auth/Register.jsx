@@ -1,58 +1,31 @@
-import { useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../services/AuthContext';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useRegister } from '@services/useAuth';
 import '@styles/auth-forms.css';
 
 const Register = () => {
-  const { register } = useContext(AuthContext);
-  const navigate = useNavigate();
-  
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
-
-  const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
+  const register = useRegister();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    const newErrors = {};
-    if (!formData.email.includes('@')) newErrors.email = 'Enter a valid email';
-    if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
-    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
-    
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
+    setError('');
+    setIsSubmitting(true);
 
-    setIsLoading(true);
-    
     try {
-      const result = await register(formData.email, formData.password);
-      if (result.success) {
-        navigate('/'); 
-      } else {
-        setErrors({ submit: result.error || 'Registration failed' });
-      }
-    } catch (error) {
-      setErrors({ submit: 'Something went wrong' });
+      if (!email.includes('@')) throw new Error('Enter a valid email');
+      if (password.length < 6) throw new Error('Password must be at least 6 characters');
+      if (password !== confirmPassword) throw new Error('Passwords do not match');
+
+      await register(email, password);
+    } catch (err) {
+      setError(err.message || 'Registration failed');
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -62,54 +35,49 @@ const Register = () => {
         <h1>Register</h1>
       </div>
 
-      {errors.submit && <div className="error-message">{errors.submit}</div>}
+      {error && <div className="error-message">{error}</div>}
 
       <form className="auth-form" onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="email">Email:</label>
+          <label>Email:</label>
           <input
             type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className={errors.email ? 'has-error' : ''}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={isSubmitting}
           />
-          {errors.email && <span className="form-error">{errors.email}</span>}
         </div>
 
         <div className="form-group">
-          <label htmlFor="password">Password:</label>
+          <label>Password:</label>
           <input
             type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            className={errors.password ? 'has-error' : ''}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength="6"
+            disabled={isSubmitting}
           />
-          {errors.password && <span className="form-error">{errors.password}</span>}
         </div>
 
         <div className="form-group">
-          <label htmlFor="confirmPassword">Confirm Password:</label>
+          <label>Confirm Password:</label>
           <input
             type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            className={errors.confirmPassword ? 'has-error' : ''}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            disabled={isSubmitting}
           />
-          {errors.confirmPassword && <span className="form-error">{errors.confirmPassword}</span>}
         </div>
 
         <button 
           type="submit" 
           className="submit-btn" 
-          disabled={isLoading}
+          disabled={isSubmitting}
         >
-          {isLoading ? 'Registering...' : 'Register'}
+          {isSubmitting ? 'Processing...' : 'Register'}
         </button>
 
         <p className="auth-form-footer">

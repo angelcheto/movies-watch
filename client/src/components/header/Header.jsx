@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
-import { useContext } from 'react';
-import { AuthContext } from '../../services/AuthContext';
+import { useAuthContext } from '../../services/AuthContext';
+import { useLogout } from '../../services/useAuth';
 import '@styles/navigation.css';
 
 const Header = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user } = useAuthContext();
+  const logout = useLogout();
 
   return (
     <header>
@@ -15,7 +16,9 @@ const Header = () => {
         {user ? (
           <div id="user">
             <Link to="/movies/create">Add Movie</Link>
-            <button onClick={logout}>Logout</button>
+            <button onClick={logout}>
+              Logout
+            </button>
             <span>Welcome, {user.email}</span>
           </div>
         ) : (
