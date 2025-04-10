@@ -1,6 +1,6 @@
 import requester from './requester';
 
-const BASE_URL = 'http://localhost:3030/users';
+const BASE_URL = '/api/users';
 
 /**
  * 

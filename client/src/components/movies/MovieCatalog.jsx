@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import movieService from '../../services/movieService';  
+import movieAPI from '@services/movieAPI';
 import '@styles/movie-catalog.css';
 
 const MovieCatalog = () => {
@@ -11,7 +11,7 @@ const MovieCatalog = () => {
   useEffect(() => {
     const loadMovies = async () => {
       try {
-        const data = await movieService.getAll();
+        const data = await movieAPI.getAll();
         setMovies(data);
       } catch {
         setError('Failed to load movies');

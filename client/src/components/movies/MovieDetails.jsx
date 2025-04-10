@@ -2,43 +2,51 @@ import "@styles/movie-details.css";
 import { useParams, useNavigate } from 'react-router-dom';
 import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../../services/AuthContext';
-import movieService from '../../services/movieService';
+import movieAPI from '../../services/movieAPI';
+import commentsAPI from '../../services/commentsAPI';
 
 const MovieDetails = () => {
   const { movieId } = useParams();
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [movie, setMovie] = useState(null);
+  const [comments, setComments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [comment, setComment] = useState('');
+  const [commentInput, setCommentInput] = useState('');
 
   useEffect(() => {
-    const fetchMovie = async () => {
+    const loadData = async () => {
       try {
-        const movieData = await movieService.getById(movieId);
+        const movieData = await movieAPI.getOne(movieId);
+        const commentsData = await commentsAPI.getAll(movieId);
         setMovie(movieData);
+        setComments(commentsData);
       } catch (err) {
         setError(err.message);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchMovie();
+    loadData();
   }, [movieId]);
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    if (!comment.trim()) return;
+    if (!commentInput.trim()) return;
     
     try {
-      const updatedMovie = await movieService.addComment(movieId, {
-        author: user.email,
-        content: comment,
-        createdAt: new Date().toISOString()
+      const newComment = await commentsAPI.addComment(movieId, {
+        content: commentInput,
+        author: { email: user.email } 
       });
-      setMovie(updatedMovie);
-      setComment('');
+      
+      setComments(prev => [...prev, {
+        ...newComment,
+        author: { email: user.email },
+        _createdOn: new Date().toISOString()
+      }]);
+      setCommentInput('');
     } catch (err) {
       console.error('Error adding comment:', err);
     }
@@ -47,7 +55,7 @@ const MovieDetails = () => {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this movie?')) {
       try {
-        await movieService.remove(movieId);
+        await movieAPI.remove(movieId);
         navigate('/');
       } catch (err) {
         console.error('Error deleting movie:', err);
@@ -83,12 +91,19 @@ const MovieDetails = () => {
 
       <div className="reviews-section">
         <h2>Reviews</h2>
-        {movie.comments?.length > 0 ? (
+        {comments.length > 0 ? (
           <ul className="reviews-list">
-            {movie.comments.map((c, i) => (
-              <li key={i}>
-                <p className="author">{c.author}</p>
-                <p>{c.content}</p>
+            {comments.map((comment) => (
+              <li key={comment._id}>
+                <p className="author">
+                  {comment.author?.email || 'Anonymous'}
+                </p>
+                <p>{comment.content}</p>
+                {comment._createdOn && (
+                  <p className="comment-date">
+                    {new Date(comment._createdOn).toLocaleDateString()}
+                  </p>
+                )}
               </li>
             ))}
           </ul>
@@ -97,7 +112,7 @@ const MovieDetails = () => {
         )}
       </div>
 
-      {user && user._id === movie.ownerId && (
+      {user?._id === movie.ownerId && (
         <div className="action-buttons">
           <button onClick={() => navigate(`/movies/${movie._id}/edit`)}>
             Edit
@@ -112,8 +127,8 @@ const MovieDetails = () => {
         <form className="review-form" onSubmit={handleCommentSubmit}>
           <label>Add Review</label>
           <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
+            value={commentInput}
+            onChange={(e) => setCommentInput(e.target.value)}
             placeholder="Write your review..."
             required
           />

@@ -7,13 +7,32 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedAuth = localStorage.getItem('auth');
-    setAuthState(storedAuth ? JSON.parse(storedAuth) : null);
-    setLoading(false);
+    const validateStoredAuth = () => {
+      try {
+        const storedAuth = localStorage.getItem('auth');
+        if (!storedAuth) {
+          setLoading(false);
+          return;
+        }
+
+        const parsedAuth = JSON.parse(storedAuth);
+        if (parsedAuth?.accessToken && parsedAuth?._id && parsedAuth?.email) {
+          setAuthState(parsedAuth);
+        } else {
+          localStorage.removeItem('auth');
+        }
+      } catch (error) {
+        localStorage.removeItem('auth');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    validateStoredAuth();
   }, []);
 
   useEffect(() => {
-    if (authState) {
+    if (authState?.accessToken) {
       localStorage.setItem('auth', JSON.stringify(authState));
     } else {
       localStorage.removeItem('auth');

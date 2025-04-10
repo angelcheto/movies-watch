@@ -1,7 +1,7 @@
 import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../services/AuthContext';
-import movieService from '../../services/movieService';  
+import movieAPI from '../../services/movieAPI';  
 import '@styles/movie-form.css';
 
 const CreateMovie = () => {
@@ -23,14 +23,24 @@ const CreateMovie = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+  
+    if (!formData.title || !formData.genre || !formData.year) {
+      setError('Title, Genre, and Year are required');
+      return;
+    }
+  
     try {
-      const newMovie = await movieService.create(formData, user.token);
-      navigate(`/movies/${newMovie._id}`);
+      const newMovie = await movieAPI.create(formData);
+      
+      if (newMovie._id) {
+        navigate(`/movies/${newMovie._id}`);
+      }
     } catch (err) {
-      setError(err.message || 'Failed to create movie');
+      console.error('Creation Error:', err);
+      setError(err.message || 'Failed to create movie. Please try again.');
     }
   };
-
   return (
     <div className="movie-form-container">
       <h1>Add New Movie</h1>

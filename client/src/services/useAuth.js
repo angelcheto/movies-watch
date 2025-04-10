@@ -7,12 +7,25 @@ export const useLogin = () => {
   const navigate = useNavigate();
 
   const loginHandler = async (email, password) => {
-      const { password: _, ...authData } = await login(email, password);
-      changeAuthState(authData);
-      localStorage.setItem('auth', JSON.stringify(authData)); 
-      navigate('/'); 
+    try {
+      const authData = await login(email, password);
+      
+      const tokenPayload = {
+        accessToken: authData.accessToken,
+        _id: authData._id,
+        email: authData.email
+      };
+      
+      localStorage.setItem('auth', JSON.stringify(tokenPayload));
+      changeAuthState(tokenPayload);
+      navigate('/');
+      
       return authData;
-  }
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
+  };
 
   return loginHandler;
 };

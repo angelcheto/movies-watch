@@ -1,23 +1,29 @@
 import "@styles/movie-form.css";
 import { useParams, useNavigate } from 'react-router-dom';
 import { useContext, useState, useEffect } from 'react';
-import { AuthContext } from '../../services/AuthContext';
-import movieService from '../../services/movieService';
+import { AuthContext } from '@services/AuthContext';
+import movieAPI from '@services/movieAPI';
 
 const EditMovie = () => {
   const { movieId } = useParams();
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [form, setForm] = useState({ title: '', genre: '', year: '', imageUrl: '', description: '' });
+  const [form, setForm] = useState({ 
+    title: '', 
+    genre: '', 
+    year: '', 
+    imageUrl: '', 
+    description: '' 
+  });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadMovie = async () => {
       try {
-        const movie = await movieService.getById(movieId);
-        if (movie.ownerId !== user._id) return navigate('/');
-        setForm(movie);
+        const movie = await movieAPI.getOne(movieId);
+        if (!user || movie.ownerId !== user._id) return navigate('/');
+        setForm({ ...movie, year: movie.year.toString() });
       } catch {
         navigate('/');
       } finally {
@@ -37,7 +43,9 @@ const EditMovie = () => {
     const newErrors = {};
     if (!form.title.trim()) newErrors.title = 'Title required';
     if (!form.genre.trim()) newErrors.genre = 'Genre required';
-    if (!form.year || form.year < 1900 || form.year > 2030) newErrors.year = 'Valid year required';
+    if (!form.year || form.year < 1900 || form.year > new Date().getFullYear() + 5) {
+      newErrors.year = 'Valid year required';
+    }
     if (!form.imageUrl.trim()) newErrors.imageUrl = 'Image URL required';
     if (!form.description.trim()) newErrors.description = 'Description required';
     setErrors(newErrors);
@@ -49,10 +57,10 @@ const EditMovie = () => {
     if (!validate()) return;
 
     try {
-      await movieService.update(movieId, form);
+      await movieAPI.update(movieId, { ...form, year: parseInt(form.year) });
       navigate(`/movies/${movieId}`);
-    } catch {
-      setErrors({ submit: 'Update failed. Please try again.' });
+    } catch (err) {
+      setErrors({ submit: err.message || 'Update failed. Please try again.' });
     }
   };
 
@@ -73,7 +81,7 @@ const EditMovie = () => {
               value={form[field]}
               onChange={handleChange}
               min={field === 'year' ? '1900' : undefined}
-              max={field === 'year' ? '2030' : undefined}
+              max={field === 'year' ? new Date().getFullYear() + 5 : undefined}
             />
             {errors[field] && <span>{errors[field]}</span>}
           </div>
@@ -85,8 +93,8 @@ const EditMovie = () => {
           {errors.description && <span>{errors.description}</span>}
         </div>
         
-        <button type="submit" disabled={loading}>
-          {loading ? 'Saving...' : 'Save Changes'}
+        <button type="submit">
+          Save Changes
         </button>
       </form>
     </div>

@@ -6,35 +6,34 @@ async function requester(method, url, data) {
     headers: {}
   };
 
+  const accessToken = getAccessToken();
+  if (accessToken) {
+    options.headers['X-Authorization'] = accessToken;
+  }
+
+  if (data) {
+    options.headers['Content-Type'] = 'application/json';
+    options.body = JSON.stringify(data);
+  }
+
   try {
-    const accessToken = getAccessToken();
-    if (accessToken) {
-      options.headers['Authorization'] = `Bearer ${accessToken}`;
-    }
-
-    if (data) {
-      options.headers['Content-Type'] = 'application/json';
-      options.body = JSON.stringify(data);
-    }
-
-    console.log('Making request to:', url, 'with options:', options);
-    
     const response = await fetch(url, options);
-    console.log('Received response:', response.status, response.statusText);
+    
+    if (response.status === 204) {
+      return;
+    }
 
-    if (response.status === 204) return null;
-    
-    const result = await response.json().catch(() => ({}));
-    
+    const result = await response.json();
+
     if (!response.ok) {
-      console.error('API Error:', result);
-      throw new Error(result.message || `Request failed with status ${response.status}`);
+      throw result;
     }
 
     return result;
+
   } catch (error) {
-    console.error('Full error details:', error);
-    throw new Error(error.message || 'Network request failed');
+    console.error('Request failed:', error.message || error);
+    throw error;
   }
 }
 
