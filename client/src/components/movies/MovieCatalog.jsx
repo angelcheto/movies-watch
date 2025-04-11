@@ -22,27 +22,31 @@ const MovieCatalog = () => {
     loadMovies();
   }, []);
 
-  if (loading) return <div>Loading movies...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return <div className="loading">Loading movies...</div>;
+  if (error) return <div className="error-message">{error}</div>;
 
   return (
-    <div className="catalog">
-      <h1>Movie Catalog</h1>
-      <div className="movies">
-        {movies.map(movie => (
-          <div key={movie._id} className="movie">
-            <Link to={`/movies/${movie._id}`}>
-              <img 
-                src={movie.imageUrl} 
-                alt={movie.title}
-                onError={(e) => e.target.src = '/images/placeholder.jpg'}
-              />
-              <h3>{movie.title}</h3>
-              <p>{movie.genre} • {movie.year}</p>
+    <div className="movie-grid">
+      {movies.map(movie => (
+        <div className="movie-card" key={movie._id}>
+          <img 
+            className="movie-poster" 
+            src={movie.imageUrl}
+            alt={movie.title}
+            onError={(e) => e.target.src = '/images/movie_placeholder.jpg'}
+          />
+          <div className="movie-info">
+            <h3 className="movie-title">{movie.title}</h3>
+            <div className="movie-meta">
+              <span className="badge">{movie.genre}</span>
+              <span className="movie-year">{movie.year}</span>
+            </div>
+            <Link to={`/movies/${movie._id}`} className="details-link">
+              View Details
             </Link>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 };

@@ -8,26 +8,31 @@ const Header = () => {
   const logout = useLogout();
 
   return (
-    <header>
-      <h1><Link className="home" to="/">MovieHub</Link></h1>
-      <nav>
-        <Link to="/">All movies</Link>
+    <header className="header">
+      <div className="nav-container">
+        <h1>
+          <Link to="/" className="brand">MovieHub</Link>
+        </h1>
         
-        {user ? (
-          <div id="user">
-            <Link to="/movies/create">Add Movie</Link>
-            <button onClick={logout}>
-              Logout
-            </button>
-            <span>Welcome, {user.email}</span>
-          </div>
-        ) : (
-          <div id="guest">
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
-          </div>
-        )}
-      </nav>
+        <nav className="nav-links">
+          <Link to="/catalog" className="nav-link">All Movies</Link>
+          
+          {user ? (
+            <div id="user">
+              <Link to="/movies/create" className="nav-link">Add Movie</Link>
+              <button onClick={logout} className="logout-btn">
+                Logout
+              </button>
+              <span className="user-greeting">Welcome, {user.email}</span>
+            </div>
+          ) : (
+            <div id="guest">
+              <Link to="/login" className="nav-link">Login</Link>
+              <Link to="/register" className="nav-link">Register</Link>
+            </div>
+          )}
+        </nav>
+      </div>
     </header>
   );
 };

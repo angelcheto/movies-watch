@@ -1,8 +1,8 @@
 import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../services/AuthContext';
-import movieAPI from '../../services/movieAPI';  
-import '@styles/movie-form.css';
+import movieAPI from '../../services/movieAPI';
+import '@styles/movie-form.css'
 
 const CreateMovie = () => {
   const { user } = useContext(AuthContext);
@@ -31,7 +31,10 @@ const CreateMovie = () => {
     }
   
     try {
-      const newMovie = await movieAPI.create(formData);
+      const newMovie = await movieAPI.create({
+        ...formData,
+        ownerId: user._id  
+      });
       
       if (newMovie._id) {
         navigate(`/movies/${newMovie._id}`);
@@ -41,6 +44,7 @@ const CreateMovie = () => {
       setError(err.message || 'Failed to create movie. Please try again.');
     }
   };
+
   return (
     <div className="movie-form-container">
       <h1>Add New Movie</h1>

@@ -67,13 +67,13 @@ const EditMovie = () => {
   if (loading) return <div className="loading">Loading...</div>;
 
   return (
-    <div className="form-container">
+    <div className="movie-form-container">
       <h1>Edit Movie</h1>
-      {errors.submit && <div className="error">{errors.submit}</div>}
+      {errors.submit && <div className="error-message">{errors.submit}</div>}
       
       <form onSubmit={handleSubmit}>
         {['title', 'genre', 'year', 'imageUrl'].map(field => (
-          <div key={field} className={`form-group ${errors[field] ? 'error' : ''}`}>
+          <div key={field} className={`form-group ${errors[field] ? 'has-error' : ''}`}>
             <label>{field.charAt(0).toUpperCase() + field.slice(1)}</label>
             <input
               type={field === 'year' ? 'number' : 'text'}
@@ -83,17 +83,17 @@ const EditMovie = () => {
               min={field === 'year' ? '1900' : undefined}
               max={field === 'year' ? new Date().getFullYear() + 5 : undefined}
             />
-            {errors[field] && <span>{errors[field]}</span>}
+            {errors[field] && <span className="error-text">{errors[field]}</span>}
           </div>
         ))}
 
-        <div className={`form-group ${errors.description ? 'error' : ''}`}>
+        <div className={`form-group ${errors.description ? 'has-error' : ''}`}>
           <label>Description</label>
           <textarea name="description" value={form.description} onChange={handleChange} />
-          {errors.description && <span>{errors.description}</span>}
+          {errors.description && <span className="error-text">{errors.description}</span>}
         </div>
         
-        <button type="submit">
+        <button type="submit" className="submit-button">
           Save Changes
         </button>
       </form>
