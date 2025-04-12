@@ -35,10 +35,11 @@ const MovieDetails = () => {
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!commentInput.trim()) return;
-    
+  
     try {
-      const newComment = await commentsAPI.addComment(movieId, commentInput);
-      setComments(prev => [...prev, newComment]);
+      await commentsAPI.addComment(movieId, commentInput);
+      const updatedComments = await commentsAPI.getAll(movieId);
+      setComments(updatedComments);
       setCommentInput('');
     } catch (err) {
       console.error('Error adding comment:', err);
