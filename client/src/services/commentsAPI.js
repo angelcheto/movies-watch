@@ -2,10 +2,10 @@ import requester from './requester';
 
 const BASE_URL = '/api/data/comments';
 
-const createComment = (movieId, text) => 
+const createComment = (movieId, content) => 
   requester.post(BASE_URL, { 
     movieId, 
-    text,
+    content,
     userId: localStorage.getItem('auth')?.userId 
   });
 
